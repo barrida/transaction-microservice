@@ -1,0 +1,38 @@
+--DROP TABLE IF EXISTS transactions,account cascade;
+--
+--CREATE TYPE type AS ENUM ('CREDIT', 'DEBIT');
+--
+--CREATE TABLE transactions (
+--  id INT AUTO_INCREMENT PRIMARY KEY,
+--  accountId INT NOT NULL,
+--  currency VARCHAR(250) NOT NULL,
+--  description VARCHAR(250) NOT NULL,
+--  amount DOUBLE,
+--  type type
+--  );
+--
+--CREATE TABLE account (
+--  id                  INT AUTO_INCREMENT PRIMARY KEY,
+--  balance   DOUBLE,
+--  account_id_pk INT,
+--  CONSTRAINT FK_transactionsaccount FOREIGN KEY (account_id_pk)
+--  REFERENCES transactions(id) ON DELETE CASCADE
+--);
+--
+--ALTER TABLE account
+--DROP CONSTRAINT FK_transactionsaccount;
+--
+--ALTER TABLE account
+--ADD CONSTRAINT FK_transactionsaccount
+--FOREIGN KEY (account_id_pk) REFERENCES transactions(id);
+--
+--INSERT INTO transactions (id, accountId, currency, description, amount, type)
+--VALUES
+--(1,1,'GBP,','desc' ,250, 'CREDIT'),
+--(2,1,'GBP,','desc 2',250, 'CREDIT'),
+--(3,1,'GBP,','desc 2',100, 'DEBIT');
+--
+--INSERT INTO account(id, balance, account_id_pk) VALUES
+--(1,(SELECT balance from transactions WHERE account_id_pk = 1), 1);
+--
+--
