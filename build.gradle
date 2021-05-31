@@ -46,3 +46,5 @@ dependencies {
 test {
 	useJUnit()
 }
+apply plugin: 'spring-boot-application'
+mainClassName = 'TomatopayApplication'
