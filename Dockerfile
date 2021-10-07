@@ -1,24 +1,31 @@
-FROM gradle:4.7.0-jdk8-alpine AS build
+#stage 1
+#Start with a base image containing Java runtime
+FROM openjdk:11-slim as build
 
+# Add Maintainer Info
+LABEL maintainer="Suleyman Yildirim <suleymanube@gmail.com>"
 
-#install gradle
-RUN wget https://downloads.gradle-dn.com/distributions/gradle-6.8.3-bin.zip
-RUN unzip gradle-6.8.3-bin.zip
-ENV GRADLE_HOME /gradle-6.8.3
-ENV PATH $PATH:/gradle-6.8.3/bin
+# The application's jar file
+ARG JAR_FILE
 
-#compile and run app
-COPY --chown=gradle:gradle . /home/gradle/src
+# Add the application's jar to the container
+COPY ${JAR_FILE} app.jar
 
-WORKDIR /home/gradle/src
-RUN gradle build --no-daemon
+#unpackage jar file
+RUN mkdir -p target/dependency && (cd target/dependency; jar -xf /app.jar)
 
-FROM openjdk:8-jre-slim
+#stage 2
+#Same Java runtime
+FROM openjdk:11-slim
 
-EXPOSE 8080
+#Add volume pointing to /tmp
+VOLUME /tmp
 
-RUN mkdir /app
+#Copy unpackaged application to new container
+ARG DEPENDENCY=/target/dependency
+COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
+COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
+COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
 
-COPY --from=build /home/gradle/src/build/libs/*.jar /app/spring-boot-application.jar
-
-ENTRYPOINT ["java", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseCGroupMemoryLimitForHeap", "-Djava.security.egd=file:/dev/./urandom","-jar","/app/spring-boot-application.jar"]
+#execute the application
+ENTRYPOINT ["java","-cp","app:app/lib/*","com.assignment.tomatopay.TomatopayApplication"]
